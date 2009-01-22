@@ -9,7 +9,7 @@ function rel2abs {
 }
 
 
-MAINMK=/home/thomas/rip/new.mk
+MAINMK=$(pwd)/rip.mk
 
 DVDDIR=$(rel2abs $1)
 OUTBASE=$2

@@ -9,8 +9,6 @@ function rel2abs {
 }
 
 
-MAINMK=$(pwd)/rip.mk
-
 DVDDIR=$(rel2abs $1)
 OUTBASE=$2
 PREFIX=$3
@@ -40,7 +38,7 @@ awk --assign dvddir=$DVDDIR --assign cfgloc=$CFGLOC --assign outdir=$OUTBASE 'EN
 	print "\tdefault \"" dvddir "\""
 	print "config SOURCE_CACHE"
 	print "\tstring \"mencoder cache size (0 disables)\""
-	print "\tdefault 8192"
+	print "\tdefault 0"
 	print "config CFG"
 	print "\tstring \"Config file storage location\""
 	print "\tdefault \"" cfgloc "\""
@@ -115,7 +113,7 @@ for t in $(seq 1 $nt);do
 done
 ) > Config
 
-/usr/src/linux/scripts/kconfig/mconf Config
+#/usr/src/linux/scripts/kconfig/mconf Config
 
 [ ! -e .config ] && exit
 
@@ -139,13 +137,4 @@ CFG=$(sed -nr 's/^CONFIG_CFG="([^"]+)"$/\1/p' < .config)
 tr -d '"' < .config > "$CFG"
 rm .config
 
-for t in $TITLES;do
-	output=$(sed -nr 's/^CONFIG_TITLE_'$t'_OUTPUT=(.*)$/\1/p' < "$CFG")
-	dir=$(mktemp -d -p . "rip.$(basename $output).XXXXXX")
-	(
-	echo "include $CFG"
-	echo "CFG_PREFIX := CONFIG_TITLE_${t}_"
-	echo "CURTITLE := ${t}"
-	echo "include $MAINMK"
-	) > "$dir/Makefile"
-done
+./mkdirs.sh "$CFG"

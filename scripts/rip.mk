@@ -52,7 +52,8 @@ video.avi : autocrop.txt
 		-x264encopts crf=$($(CFG_PREFIX)VIDEO_CRF):frameref=6:bframes=4:b_adapt:b_pyramid:direct_pred=auto:partitions=all:8x8dct:me=umh:subq=7:weight_b:brdo:bime:trellis=2:threads=$($(CFG_PREFIX)VIDEO_THREADS) \
 		-vf-add crop=$$(cat $^) $(DEINTERLACE) \
 		-vf-add harddup \
-		-o "$@"
+		-o "$@.tmp"
+	@mv "$@.tmp" "$@"
 
 audio-$(FIRST_AUDIO).avi :
 	@echo "  AID $* link $($(CFG_PREFIX)NAME)"

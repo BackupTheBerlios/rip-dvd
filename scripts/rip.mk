@@ -1,7 +1,7 @@
 .SUFFIXES:
 
 " = "
-SOURCE = -dvd-device $(CONFIG_SOURCE_DVD) dvd://$(CURTITLE) -cache $(CONFIG_SOURCE_CACHE) $(if $(subst $",,$($(CFG_PREFIX)START)),-ss $($(CFG_PREFIX)START)) $(if $(subst $",,$($(CFG_PREFIX)LENGTH)),-endpos $($(CFG_PREFIX)LENGTH))
+SOURCE = -dvd-device $(CONFIG_SOURCE_DVD) dvd://$(CURTITLE) $(if $(subst 0,,$(CONFIG_SOURCE_CACHE)),-cache $(CONFIG_SOURCE_CACHE)) $(if $(subst $",,$($(CFG_PREFIX)START)),-ss $($(CFG_PREFIX)START)) $(if $(subst $",,$($(CFG_PREFIX)LENGTH)),-endpos $($(CFG_PREFIX)LENGTH))
 
 define audio_target
 ifeq ($$($$(CFG_PREFIX)AUDIO_$(1)_COPY),y)

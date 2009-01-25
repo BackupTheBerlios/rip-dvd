@@ -49,7 +49,7 @@ endif
 video.avi : autocrop.txt
 	@echo "VIDEO   $($(CFG_PREFIX)NAME)"
 	@mencoderwrap "$($(CFG_PREFIX)NAME) (video)" $(SOURCE) -ovc x264 -oac copy $(if $(FIRST_AUDIO),-aid $(FIRST_AUDIO)) \
-		-x264encopts crf=$($(CFG_PREFIX)VIDEO_CRF):frameref=6:bframes=4:b_adapt:b_pyramid:direct_pred=auto:partitions=all:8x8dct:me=umh:subq=7:weight_b:brdo:bime:trellis=2:threads=$($(CFG_PREFIX)VIDEO_THREADS) \
+		-x264encopts crf=$($(CFG_PREFIX)VIDEO_CRF):frameref=6:bframes=4:b_adapt:b_pyramid:direct_pred=auto:partitions=all:8x8dct:me=umh:subq=7:weight_b:trellis=2:threads=$($(CFG_PREFIX)VIDEO_THREADS) \
 		-vf-add crop=$$(cat $^) $(DEINTERLACE) \
 		-vf-add harddup \
 		-o "$@.tmp"

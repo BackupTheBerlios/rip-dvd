@@ -54,9 +54,9 @@ video.avi : autocrop.txt
 		-vf-add harddup \
 		-o "$@"
 
-#audio-$(FIRST_AUDIO).avi :
-#	@echo "  AID $* link $($(CFG_PREFIX)NAME)"
-#	@ln -s video.avi "$@"
+audio-$(FIRST_AUDIO).avi :
+	@echo "  AID $* link $($(CFG_PREFIX)NAME)"
+	@ln -s video.avi "$@"
 
 # Always rip from an avi that has been ripped with both audio & video.  This prevents AV desync due to -ss skipping to
 # different places when the video is disabled

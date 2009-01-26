@@ -23,7 +23,7 @@ fi
 
 nt=$(mplayer -dvd-device "$DVDDIR" dvd:// -identify -quiet -frames 0 2>&1 | sed -nr 's/^ID_DVD_TITLES=([0-9]+)$/\1/p')
 
-if [ -w "$DVDDIR" ];then
+if [ -w "$DVDDIR" ] && [ -d "$DVDDIR" ];then
 	CFGLOC="$DVDDIR/config"
 else
 	CFGLOC="$(basename $DVDDIR).config"

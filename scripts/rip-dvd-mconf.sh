@@ -113,7 +113,7 @@ for t in $(seq 1 $nt);do
 done
 ) > Config
 
-#/usr/src/linux/scripts/kconfig/mconf Config
+/usr/src/linux/scripts/kconfig/mconf Config
 
 [ ! -e .config ] && exit
 

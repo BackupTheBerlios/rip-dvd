@@ -26,7 +26,7 @@ nt=$(mplayer -dvd-device "$DVDDIR" dvd:// -identify -quiet -frames 0 2>&1 | sed 
 if [ -w "$DVDDIR" ] && [ -d "$DVDDIR" ];then
 	CFGLOC="$DVDDIR/config"
 else
-	CFGLOC="$(basename $DVDDIR).config"
+	CFGLOC="$(pwd)/$(basename $DVDDIR).config"
 fi
 
 (

@@ -3,11 +3,19 @@
 " = "
 SOURCE = -dvd-device $(CONFIG_SOURCE_DVD) dvd://$(CURTITLE) $(if $(subst 0,,$(CONFIG_SOURCE_CACHE)),-cache $(CONFIG_SOURCE_CACHE)) $(if $(subst $",,$($(CFG_PREFIX)START)),-ss $($(CFG_PREFIX)START)) $(if $(subst $",,$($(CFG_PREFIX)LENGTH)),-endpos $($(CFG_PREFIX)LENGTH))
 
+FIRST_AUDIO := $(firstword $($(CFG_PREFIX)AUDIOS))
+
 define audio_target
 ifeq ($$($$(CFG_PREFIX)AUDIO_$(1)_COPY),y)
 AUDIO_TARGET_$(1) = audio-$(1).avi
+ifeq ($(1),$$(FIRST_AUDIO))
+AUDIO_TARGET_$(1)_TRACK = 1
+else
+AUDIO_TARGET_$(1)_TRACK = 0
+endif
 else
 AUDIO_TARGET_$(1) = audio-$(1).ogg
+AUDIO_TARGET_$(1)_TRACK = 0
 endif
 AUDIO_TARGETS += audio-$(1).lang $$(AUDIO_TARGET_$(1))
 endef
@@ -15,8 +23,6 @@ endef
 AUDIO_TARGETS :=
 $(foreach a,$($(CFG_PREFIX)AUDIOS),$(eval $(call audio_target,$(a))))
 SUBTITLE_TARGETS = $(foreach s,$($(CFG_PREFIX)SUBTITLES),sub-$(s).idx)
-
-FIRST_AUDIO := $(firstword $($(CFG_PREFIX)AUDIOS))
 
 ifeq ($($(CFG_PREFIX)DEINTERLACE),y)
 DEINTERLACE := -vf-add pp=lb
@@ -98,8 +104,8 @@ sub-%.idx :
 
 output.mkv : video.avi identify.txt chapters.txt $(SUBTITLE_TARGETS) $(AUDIO_TARGETS)
 	@echo "  MUX   $($(CFG_PREFIX)NAME)"
-	@-mkvmerge -o "$@.tmp" --chapters chapters.txt --title "$($(CFG_PREFIX)NAME)" --noaudio video.avi \
-		$(foreach aid,$($(CFG_PREFIX)AUDIOS),--language 0:$$(cat "audio-$(aid).lang") --novideo "$(AUDIO_TARGET_$(aid))") \
+	@-mkvmerge -o "$@.tmp" $(if $(shell test -s chapters.txt && echo y),--chapters chapters.txt) --title "$($(CFG_PREFIX)NAME)" --noaudio video.avi \
+		$(foreach aid,$($(CFG_PREFIX)AUDIOS),--language $(AUDIO_TARGET_$(aid)_TRACK):$$(cat "audio-$(aid).lang") --novideo "$(AUDIO_TARGET_$(aid))") \
 		$(foreach sid,$($(CFG_PREFIX)SUBTITLES),"sub-$(sid).idx") > mux.log 2>&1
 	@mv "$@.tmp" "$@"
 

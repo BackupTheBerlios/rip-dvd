@@ -62,14 +62,15 @@ for t in $(seq 1 $nt);do
 				print "\tstring \"Name\""
 				print "\tdefault \"" prefix "\""
 				print "\tdepends on TITLE_" title
-				print "menu \"Video options\""
-				print "\tdepends on TITLE_" title
 				print "config TITLE_" title "_DEINTERLACE"
 				print "\tbool \"Deinterlace the video\""
 				print "\tdefault n"
+				print "\tdepends on TITLE_" title
+				print "menu \"Video options\""
+				print "\tdepends on TITLE_" title
 				print "config TITLE_" title "_START"
 				print "\tstring \"Starting time (must be in a format mencoder can understand)\""
-				print "\tdefault 6"
+				print "\tdefault 0.1"
 				print "config TITLE_" title "_LENGTH"
 				print "\tstring \"Amount of input to rip (must be a time that mencoder can understand)\""
 				print "\tdefault \"\""

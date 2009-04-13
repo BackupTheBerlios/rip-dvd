@@ -12,7 +12,9 @@ DEINTERLACE_FILTER := yadif
 
 # Define a variable called " that expands to " (a crude form of escaping)
 " = "
-SOURCE = -dvd-device $(CONFIG_SOURCE_DVD) dvd://$(CURTITLE) $(if $(subst 0,,$(CONFIG_SOURCE_CACHE)),-cache $(CONFIG_SOURCE_CACHE)) $(if $(subst $",,$($(CFG_PREFIX)START)),-ss $($(CFG_PREFIX)START)) $(if $(subst $",,$($(CFG_PREFIX)LENGTH)),-endpos $($(CFG_PREFIX)LENGTH))
+
+# Build the source definition for mplayer/mencoder
+SOURCE = -dvd-device $(CONFIG_SOURCE_DVD) dvd://$($(CFG_PREFIX)TITLE) $(if $(subst 0,,$(CONFIG_SOURCE_CACHE)),-cache $(CONFIG_SOURCE_CACHE)) $(if $(subst $",,$($(CFG_PREFIX)START)),-ss $($(CFG_PREFIX)START)) $(if $(subst $",,$($(CFG_PREFIX)LENGTH)),-endpos $($(CFG_PREFIX)LENGTH)) $(if $(subst $",,$($(CFG_PREFIX)CHAPTERS)),-chapter $($(CFG_PREFIX)CHAPTERS))
 
 FIRST_AUDIO := $(firstword $($(CFG_PREFIX)AUDIOS))
 

@@ -74,6 +74,13 @@ for t in $(seq 1 $nt);do
 				print "config TITLE_" title "_LENGTH"
 				print "\tstring \"Amount of input to rip (must be a time that mencoder can understand)\""
 				print "\tdefault \"\""
+				print "config TITLE_" title "_GET_CHAPTERS"
+				print "\tbool \"Get the chapter listing from the dvd info"
+				if(tchap[title] > 1) {
+					print "\tdefault y"
+				} else {
+					print "\tdefault n"
+				}
 				print "config TITLE_" title "_VIDEO_CRF"
 				print "\tint \"CRF for x264enc\""
 				print "\trange 1 50"

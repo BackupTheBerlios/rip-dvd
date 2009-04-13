@@ -14,7 +14,6 @@ for t in $(sed -nr 's/^CONFIG_TITLES=(.*)$/\1/p' < "$CFG");do
 	(
 	echo "include $CFG"
 	echo "CFG_PREFIX := CONFIG_TITLE_${t}_"
-	echo "CURTITLE := ${t}"
 	echo "include $MAINMK"
 	) > "$dir/Makefile"
 done

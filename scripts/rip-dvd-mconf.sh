@@ -136,7 +136,7 @@ for t in $TITLES;do
 	echo "CONFIG_TITLE_${t}_AUDIOS=$AUDS"
 	FNAME=$(sed -nr 's/^CONFIG_TITLE_'$t'_NAME="([^"]+)"$/\1/p' < .config | tr ' ' '_' | tr -d '"'"'").mkv
 	echo "CONFIG_TITLE_${t}_OUTPUT="'"'"$FNAME"'"'
-	
+	echo 'CONFIG_TITLE_'${t}'_TITLE="'${t}'"'
 done
 ) >> .config
 

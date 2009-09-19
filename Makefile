@@ -5,13 +5,19 @@ INCDIR := include
 
 LDFLAGS := -lpthread
 CFLAGS := -pedantic -Wall -ggdb -I$(INCDIR)
-CC := g++ -c $(CFLAGS)
+
+CXXFLAGS := $(CFLAGS)
+CCFLAGS := $(CFLAGS) -std=c99
+
+CX := g++ -c $(CXXFLAGS)
+CC := gcc -c $(CCFLAGS)
 LD := g++ $(LDFLAGS)
 
-BINS := mkcrop mencoderwrap oggencwrap
+BINS := mkcrop mencoderwrap oggencwrap mclean
 mkcropOBJS := Process mkcrop
 mencoderwrapOBJS := Process mencoderwrap pretty
 oggencwrapOBJS := Process oggencwrap pretty
+mcleanOBJS := mclean
 
 .PHONY: all
 all : $(BINS)
@@ -46,6 +52,10 @@ $(OBJDIR) $(BINDIR) :
 	@mkdir -p $@
 
 $(OBJDIR)/%.o : $(SRCDIR)/%.cpp | $(OBJDIR)
+	@echo "  CC         $@"
+	@$(CX) -MMD -MP -o $@ $<
+
+$(OBJDIR)/%.o : $(SRCDIR)/%.c | $(OBJDIR)
 	@echo "  CC         $@"
 	@$(CC) -MMD -MP -o $@ $<
 

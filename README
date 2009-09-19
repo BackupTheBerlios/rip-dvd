@@ -46,3 +46,7 @@ independent of the method used to create the configuration file.
 The main bug in the current version is in the characters allowed in names.  I
 have had problems with apostrophes (') in names, and am not bothered enough to
 work out why (it's probably quite simple).  Patches are, of course, welcome.
+
+The percentage complete reader in mclean seems to often read something from the
+leading rubbish in the mencoder output that starts the percentage complete at
+something other that zero (often 100%).  I don't care enough to fix it.

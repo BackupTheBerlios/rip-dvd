@@ -1,0 +1,44 @@
+=> Usage
+
+There are two steps to ripping something: creating the configuration file and
+executing the rip job.
+
+To create a configuration file for ripping a DVD run ./scripts/rip-dvd-mconf.sh
+(note that this REQUIRES mconf from the Linux kernel, see below).  Select the
+titles you want, enter the names and other options then exit and save your
+kernel configuration.  This will create a configuration file, either in the DVD
+directory, if it is writeable, or in the current directory.  The script
+automatically runs ./scripts/mkdirs.sh on this configuration file, which creates
+a rip.Output_Name.mkv.random directory for each title of the DVD you selected.
+
+To execute the rip job directories simply run make in this directory.
+
+-> FILES INCLUDED
+
+mclean.c
+This is the mplayer/mencoder/oggenc output postprocessor used to extract the
+cropping parameters for auto cropping, and produce the nice progress bars in
+place of the ugly mplayer/mencoder/oggenc output.
+
+Makefile
+This will automatically compile mclean (if required) and then run all the rip
+jobs in this directory.
+
+scripts/rip.mk
+All the glue logic for the ripping itself is in here.
+
+scripts/rip-dvd-mconf.sh
+This is the main script for creating a rip job.  It relies on the linux kernel
+configuration interface (menuconfig).  To use it you will require linux kernel
+sources in /usr/src/linux that you have at least done 'make menuconfig' in.
+
+scripts/mkdirs.sh
+This reads the configuration file produced by rip-dvd-mconf.sh and creates the
+rip job directories with the require make fragment.  This is separate as it is
+independent of the method used to create the configuration file.
+
+=> BUGS
+
+The main bug in the current version is in the characters allowed in names.  I
+have had problems with apostrophes (') in names, and am not bothered enough to
+work out why (it's probably quite simple).  Patches are, of course, welcome.

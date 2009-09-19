@@ -131,7 +131,7 @@ static void parseStatusLine(char const* line, char const* pcpos) {
 		return;
 	}
 	pc = strtof(strt + 1, (char**)&next);
-	if(next == pcpos) {
+	if(next == pcpos && pc != state.pc) {
 		state.pc = pc;
 		state.update = 1;
 	}

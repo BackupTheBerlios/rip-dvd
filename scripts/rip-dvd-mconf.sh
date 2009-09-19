@@ -128,6 +128,8 @@ done
 
 /usr/src/linux/scripts/kconfig/mconf Config
 
+rm Config
+
 [ ! -e .config ] && exit
 
 TITLES=$(sed -nr 's/^CONFIG_TITLE_([0-9]+)=y$/\1/p' < .config | sort -n | xargs echo)
@@ -150,4 +152,4 @@ CFG=$(sed -nr 's/^CONFIG_CFG="([^"]+)"$/\1/p' < .config)
 tr -d '"' < .config > "$CFG"
 rm .config
 
-./mkdirs.sh "$CFG"
+./scripts/mkdirs.sh "$CFG"

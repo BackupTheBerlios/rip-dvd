@@ -1,6 +1,6 @@
 #!/bin/sh
 
-MAINMK=$(pwd)/rip.mk
+MAINMK=$(pwd)/scripts/rip.mk
 
 CFG=$1
 if [ -z "$CFG" ] || [ ! -e "$CFG" ];then

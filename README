@@ -1,5 +1,9 @@
 => Usage
 
+NOTE: I have packaged a pre-compiled version of mclean, however it is compiled
+      for an amd64 system.  If you have issues just delete it and it should be
+      automatically recompiled for your system when you run make.
+
 There are two steps to ripping something: creating the configuration file and
 executing the rip job.
 

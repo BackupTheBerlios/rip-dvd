@@ -10,14 +10,14 @@ function rel2abs {
 
 
 DVDDIR=$(rel2abs $1)
-OUTBASE=$2
-PREFIX=$3
+PREFIX=$2
+OUTBASE=$3
 [ -z "$OUTBASE" ] && OUTBASE=.
 
 OUTBASE=$(rel2abs $OUTBASE)
 
 if [ -z $DVDDIR ];then
-	echo "Usage: $0 <dvd-source> [output-base] [name-prefix]"
+	echo "Usage: $0 <dvd-source> [name-prefix] [output-base]"
 	exit
 fi
 
@@ -50,6 +50,7 @@ awk --assign dvddir=$DVDDIR --assign cfgloc=$CFGLOC --assign outdir=$OUTBASE 'EN
 
 for t in $(seq 1 $nt);do
 	mplayer -dvd-device "$DVDDIR" dvd://$t -identify -quiet -frames 0 2>&1 | awk -F= --assign title=$t --assign prefix="$PREFIX" '
+			/ID_AUDIO_ID/ { auds[$2] = $2; }
 			/ID_AID_/ { split($1, tmp, "_"); auds[tmp[3]]=$2; }
 			/ID_SID_/ { split($1, tmp, "_"); subs[tmp[3]]=$2; }
 			/ID_DVD_TITLE_[0-9]+_LENGTH/ { split($1, tmp, "_"); tlen[tmp[4]] = $2; }
@@ -64,7 +65,7 @@ for t in $(seq 1 $nt);do
 				print "\tdepends on TITLE_" title
 				print "config TITLE_" title "_DEINTERLACE"
 				print "\tbool \"Deinterlace the video\""
-				print "\tdefault n"
+				print "\tdefault y"
 				print "\tdepends on TITLE_" title
 				print "menu \"Video options\""
 				print "\tdepends on TITLE_" title
@@ -75,7 +76,7 @@ for t in $(seq 1 $nt);do
 				print "\tstring \"Amount of input to rip (must be a time that mencoder can understand)\""
 				print "\tdefault \"\""
 				print "config TITLE_" title "_GET_CHAPTERS"
-				print "\tbool \"Get the chapter listing from the dvd info"
+				print "\tbool \"Get the chapter listing from the dvd info\""
 				if(tchap[title] > 1) {
 					print "\tdefault y"
 				} else {
@@ -99,7 +100,11 @@ for t in $(seq 1 $nt);do
 				for(v in auds) {
 					print "config TITLE_" title "_AUDIO_" v
 					print "\tbool \"Rip audio stream " v " (" auds[v] ")\""
-					print "\tdefault n"
+					if(v == 128) {
+						print "\tdefault y"
+					} else {
+						print "\tdefault n"
+					}
 					print "\tdepends on TITLE_" title
 					print "config TITLE_" title "_AUDIO_" v "_COPY"
 					print "\tbool \"Copy audio track (no transcoding)\""

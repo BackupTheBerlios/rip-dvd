@@ -130,7 +130,11 @@ static void parseStatusLine(char const* line, char const* pcpos) {
 	if(strt == pcpos) {
 		return;
 	}
-	pc = strtof(strt + 1, (char**)&next);
+
+	pc = strtod(strt, (char**)&next);
+	if(state.verbose) {
+		printf("Read percentage %f from \"%s\"\n", pc, strt);
+	}
 	if(next == pcpos && pc != state.pc) {
 		state.pc = pc;
 		state.update = 1;
@@ -146,6 +150,7 @@ static void parseLine(char* line) {
 			printf("Crop Line: \"%s\"\n", line);
 		}
 	} else if((pos = strchr(line, '%')) != NULL) {
+		*pos = '\0';
 		parseStatusLine(line, pos);
 		if(state.verbose) {
 			printf("Percentage Line: \"%s\"\n", line);
@@ -198,7 +203,10 @@ int main(int argc, char** argv) {
 
 	while((sz = fread(buf, 1, BUFSZ, stdin)) != 0) {
 		size_t i;
-		for(i = 0; i != BUFSZ && linePos < LINELEN; i++) {
+		for(i = 0; i < sz; i++) {
+			if(linePos == LINELEN) {
+				linePos = 0;
+			}
 			if(buf[i] == '\n' || buf[i] == '\r') {
 				line[linePos] = '\0';
 				linePos = 0;

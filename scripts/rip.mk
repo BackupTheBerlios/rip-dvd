@@ -20,6 +20,7 @@
 MPLAYER := mplayer
 MENCODER := mencoder
 MKVMERGE := mkvmerge
+OGGENC := oggenc
 STATUSBARLEN := 24
 
 DEINTERLACE_FILTER := yadif

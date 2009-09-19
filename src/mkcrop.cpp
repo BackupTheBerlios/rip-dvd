@@ -99,7 +99,8 @@ int main(int argc, char** argv) {
 	CropParser parser(mplayerCropdetect, verbose);
 	mplayerCropdetect.getLine(mplayerCropdetect.sout, parser, 50000);
 	mplayerCropdetect.term();
-	if(parser.cropValid) {
+	mplayerCropdetect.wait();
+	if(mplayerCropdetect.normalExit && (parser.cropValid || parser.matchCount > 400)) {
 		printf("%i:%i:%i:%i", parser.cropTo.w, parser.cropTo.h, parser.cropTo.x, parser.cropTo.y);
 		fflush(stdout);
 		return 0;

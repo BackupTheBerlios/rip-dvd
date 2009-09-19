@@ -1,5 +1,5 @@
 /*
- * Part of dvd-ripper - rips DVDs to h264/vorbis|ac3/mkv
+ * Part of rip-dvd - rips DVDs to h264/vorbis|ac3/mkv
  * Copyright (C) 2009 Thomas Spurden
  * 
  * This program is free software; you can redistribute it and/or

@@ -2,6 +2,7 @@ DIRS := $(sort $(wildcard rip.*))
 PATH := $(PATH):$(shell pwd)
 
 DISTFILES := scripts/ Makefile LICENCE README mclean.c mclean
+PROJECT := rip-dvd
 VERSION := 0.1
 
 export PATH
@@ -16,7 +17,7 @@ $(DIRS) :
 mclean : mclean.c
 
 dist : $(DISTFILES)
-	@mkdir dvd-ripper-$(VERSION)
-	@cp -Rv $(DISTFILES) dvd-ripper-$(VERSION)
-	@tar -czf dvd-ripper-$(VERSION).tar.gz dvd-ripper-$(VERSION)
-	@rm -Rf -- dvd-ripper-$(VERSION)
+	@mkdir $(PROJECT)-$(VERSION)
+	@cp -Rv $(DISTFILES) $(PROJECT)-$(VERSION)
+	@tar -czf $(PROJECT)-$(VERSION).tar.gz $(PROJECT)-$(VERSION)
+	@rm -Rf -- $(PROJECT)-$(VERSION)

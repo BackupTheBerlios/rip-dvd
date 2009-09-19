@@ -1,12 +1,9 @@
 .SUFFIXES:
 
 MPLAYER := mplayer
-MPLAYERWRAP := $(MPLAYER)wrap
 MENCODER := mencoder
-MENCODERWRAP := $(MENCODER)wrap
-OGGENCWRAP := oggencwrap
-MKCROP := mkcrop
 MKVMERGE := mkvmerge
+STATUSBARLEN := 24
 
 DEINTERLACE_FILTER := yadif
 
@@ -60,7 +57,9 @@ chapters.txt :
 autocrop.txt :
 	@echo "CROP   $($(CFG_PREFIX)NAME)"
 ifeq ($(subst $",,$($(CFG_PREFIX)VIDEO_CROP)),)
-	@$(MKCROP) $(SOURCE) > "$@.tmp"
+	@while :; do echo "seek 300"; sleep 2; done \
+		| $(MPLAYER) $(SOURCE) -vf cropdetect -vo null -nosound -slave -benchmark 2>&1 \
+		| mclean -n > "$@.tmp"
 	@mv "$@.tmp" "$@"
 else
 	@echo -n $($(CFG_PREFIX)VIDEO_CROP) > "$@"
@@ -68,10 +67,11 @@ endif
 
 video.avi : autocrop.txt
 	@echo "VIDEO   $($(CFG_PREFIX)NAME)"
-	@$(MENCODERWRAP) "$($(CFG_PREFIX)NAME) (video)" $(SOURCE) -ovc x264 -oac copy $(if $(FIRST_AUDIO),-aid $(FIRST_AUDIO)) \
+	@$(MENCODER) $(SOURCE) -ovc x264 -oac copy $(if $(FIRST_AUDIO),-aid $(FIRST_AUDIO)) \
 		-x264encopts crf=$($(CFG_PREFIX)VIDEO_CRF):frameref=6:bframes=4:b_adapt:b_pyramid:direct_pred=auto:partitions=all:8x8dct:me=umh:subq=7:weight_b:trellis=2:threads=$($(CFG_PREFIX)VIDEO_THREADS) \
 		$(DEINTERLACE) -vf-add crop=$$(cat $^) -vf-add harddup \
-		-o "$@.tmp"
+		-o "$@.tmp" 2>&1 \
+		| mclean -l $(STATUSBARLEN) -- "$($(CFG_PREFIX)NAME) (video)"
 	@mv "$@.tmp" "$@"
 
 audio-$(FIRST_AUDIO).avi :
@@ -85,7 +85,8 @@ audio-$(FIRST_AUDIO).avi :
 audio-%.avi :
 	@echo "  AID $* copy $($(CFG_PREFIX)NAME)"
 # The crop filter greatly reduces the amount of space the avi takes up (have to use raw, copy doesnt get vfs applied)
-	@$(MENCODERWRAP) "$($(CFG_PREFIX)NAME) (AID $* copy)" $(SOURCE) -oac copy -ovc raw -vf crop=1:1 -aid $* -o "$@.tmp"
+	@$(MENCODER) $(SOURCE) -oac copy -ovc raw -vf crop=1:1 -aid $* -o "$@.tmp" 2>&1 \
+		| mclean -l $(STATUSBARLEN) -- "$($(CFG_PREFIX)NAME) (AID $* copy)"
 	@mv "$@.tmp" "$@"
 
 audio-%.lang :
@@ -97,7 +98,8 @@ audio-%.ogg : audio-%.avi
 	@echo "  AID $* (vorbis) $($(CFG_PREFIX)NAME)"
 	@rm -f "$@.fifo"
 	@mkfifo "$@.fifo"
-	@$(OGGENCWRAP) "$($(CFG_PREFIX)NAME) (AID $* vorbis)" -q $($(CFG_PREFIX)AUDIO_$*_QUALITY) -o "$@.tmp" "$@.fifo" &
+	@$(OGGENC) -q $($(CFG_PREFIX)AUDIO_$*_QUALITY) -o "$@.tmp" "$@.fifo" 2>&1 \
+		| mclean -- "$($(CFG_PREFIX)NAME) (AID $* vorbis)" &
 	@$(MPLAYER) "audio-$*.avi" -hardframedrop -quiet -vo null -ao pcm:fast:file="$@.fifo" > "$@.log" 2>&1
 	@mv "$@.tmp" "$@"
 	@rm "$@.fifo"
@@ -110,8 +112,9 @@ audio-%.ogg : audio-%.avi
 
 sub-%.idx :
 	@echo "   SID $* $($(CFG_PREFIX)NAME)"
-	@$(MENCODERWRAP) "$($(CFG_PREFIX)NAME) (SID $*)" $(SOURCE) -ovc copy -oac copy -o /dev/null \
-		-vf harddup -vobsubout "sub-$*.tmp" -sid $*
+	@$(MENCODER) $(SOURCE) -ovc copy -oac copy -o /dev/null \
+		-vf harddup -vobsubout "sub-$*.tmp" -sid $* 2>&1 \
+		| mclean -l $(STATUSBARLEN) -- "$($(CFG_PREFIX)NAME) (SID $*)"
 	@mv "sub-$*.tmp.idx" "sub-$*.idx"
 	@mv "sub-$*.tmp.sub" "sub-$*.sub"
 	

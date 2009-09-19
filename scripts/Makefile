@@ -1,7 +1,7 @@
 .SUFFIXES:
 
 DIRS := $(sort $(wildcard rip.*))
-PATH := $(PATH):/home/thomas/rip/
+PATH := $(PATH):$(shell pwd)
 
 export PATH
 

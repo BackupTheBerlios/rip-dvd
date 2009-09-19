@@ -1,13 +1,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
+#include <time.h>
 
-#define BUFSZ	2048
-#define LINELEN	512
+#define BUFSZ	512
+#define LINELEN	256
 #define MAX_BARLEN 64
 
 static struct {
 	float pc;
+	time_t lastTime;
 	unsigned int update : 1;
 	unsigned int verbose : 1;
 	struct {
@@ -16,6 +19,7 @@ static struct {
 	} crop;
 } state = {
 	.pc = 0.0f,
+	.lastTime = 0,
 	.update = 0,
 	.verbose = 0,
 	{ .x = 0, .y = 0, .w = 0, .h = 0, .active = 0 }
@@ -43,7 +47,7 @@ static void print(char const* prefix, unsigned int barlen) {
 			if(i <= nbars) {
 				pcbar[i] = '=';
 			} else {
-				pcbar[i] = 'x';
+				pcbar[i] = ' ';
 			}
 		}
 		printf("%s %s %04.1f%%\n", prefix, pcbar, state.pc);
@@ -88,27 +92,47 @@ static void parseCropLine(char const* line) {
 	}
 }
 
-static void parseStatusLine(char const* line) {
-	char const* pos = strchr(line, '(');
-	double pc = strtod(pos + 1, NULL);
-	if(pc != state.pc) {
+static void parseStatusLine(char const* line, char const* pcpos) {
+	char const* strt = pcpos - 1;
+	char const* next;
+	float pc;
+
+	if(pcpos == line) {
+		return;
+	}
+
+	while(strt != line) {
+		if(!(isdigit(*strt) || *strt == '.')) {
+			break;
+		}
+		strt--;
+	}
+
+	if(strt == pcpos) {
+		return;
+	}
+	pc = strtof(strt + 1, (char**)&next);
+	if(next == pcpos) {
 		state.pc = pc;
 		state.update = 1;
 	}
 }
 
 static void parseLine(char* line) {
-	if(strncmp(line, "Pos:", 4) == 0) {
-		parseStatusLine(line);
-		if(state.verbose) {
-			printf("Status Line: \"%s\"\n", line);
-		}
-	} else if(strncmp(line, "[CROP] ", 7) == 0) {
+	char* pos;
+	if(strncmp(line, "[CROP] ", 7) == 0) {
 		parseCropLine(line);
 		state.crop.active = 1;
 		if(state.verbose) {
 			printf("Crop Line: \"%s\"\n", line);
 		}
+	} else if((pos = strchr(line, '%')) != NULL) {
+		parseStatusLine(line, pos);
+		if(state.verbose) {
+			printf("Percentage Line: \"%s\"\n", line);
+		}
+	} else if(state.verbose) {
+		printf("Unknown Line: \"%s\"\n", line);
 	}
 }
 
@@ -118,6 +142,14 @@ int main(int argc, char** argv) {
 	char line[LINELEN];
 	size_t sz, linePos = 0;
 	int barlen = 16;
+	int printStatus = 1;
+
+	/*
+	 * -v     print debugging info
+	 * -l num use a percentage bar num long
+	 * -n     don't print percentage status
+	 * --     stop checking for options
+	 */
 	
 	{
 		unsigned int i;
@@ -132,6 +164,8 @@ int main(int argc, char** argv) {
 				if(i < argc) {
 					barlen = atoi(argv[i]);
 				}
+			} else if(strcmp(argv[i], "-n") == 0) {
+				printStatus = 0;
 			} else {
 				break;
 			}
@@ -153,8 +187,12 @@ int main(int argc, char** argv) {
 			} else {
 				line[linePos++] = buf[i];
 			}
-			if(state.update) {
-				print(prefix, barlen);
+			if(state.update && printStatus) {
+				time_t thisTime = time(NULL);
+				if(thisTime - state.lastTime > 2) {
+					print(prefix, barlen);
+					state.lastTime = thisTime;
+				}
 				state.update = 0;
 			}
 		}

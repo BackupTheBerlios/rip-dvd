@@ -3,7 +3,7 @@ PATH := $(PATH):$(shell pwd)
 
 DISTFILES := scripts/ Makefile LICENCE README mclean.c mclean
 PROJECT := rip-dvd
-VERSION := 0.2
+VERSION := 0.3
 
 export PATH
 

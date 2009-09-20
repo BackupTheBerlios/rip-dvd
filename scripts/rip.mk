@@ -1,4 +1,4 @@
-# Part of rip-dvd - rips DVDs to h264/vorbis|ac3/mkv
+# Part of dvd-ripper - rips DVDs to h264/vorbis|ac3/mkv
 # Copyright (C) 2009 Thomas Spurden
 # 
 # This program is free software; you can redistribute it and/or
@@ -62,38 +62,38 @@ endif
 all : $(CONFIG_OUTPUT_DIR)/$($(CFG_PREFIX)OUTPUT)
 
 identify.txt :
-	@echo "  IDEN  $($(CFG_PREFIX)NAME)"
+	@echo '  IDEN  $($(CFG_PREFIX)NAME)'
 	@$(MPLAYER) $(SOURCE) -frames 0 -identify 2>&1 | grep '^ID_' > "$@.tmp"
 	@mv "$@.tmp" "$@"
 
 chapters.txt :
-	@echo "  CHAP  $($(CFG_PREFIX)NAME)"
+	@echo '  CHAP  $($(CFG_PREFIX)NAME)'
 	@$(MPLAYER) $(SOURCE) -frames 0 -identify 2>&1 | sed -n 's/^CHAPTERS: //p' | \
 		awk -F, '{for(i = 1; i != NF; i++) { if(i < 10) { print "CHAPTER0" i "=" $$i ".000"; print "CHAPTER0" i "NAME="; } else { print "CHAPTER" i "=" $$i ".000"; print "CHAPTER" i "NAME="; } }}' > "$@.tmp"
 	@mv "$@.tmp" "$@"
 
 autocrop.txt :
-	@echo "CROP   $($(CFG_PREFIX)NAME)"
+	@echo 'CROP   $($(CFG_PREFIX)NAME)'
 ifeq ($(subst $",,$($(CFG_PREFIX)VIDEO_CROP)),)
 	@while :; do echo "seek 300"; sleep 2; done \
 		| $(MPLAYER) $(SOURCE) -vf cropdetect -vo null -nosound -slave -benchmark 2>&1 \
 		| mclean -n > "$@.tmp"
 	@mv "$@.tmp" "$@"
 else
-	@echo -n $($(CFG_PREFIX)VIDEO_CROP) > "$@"
+	@echo -n '$($(CFG_PREFIX)VIDEO_CROP)' > "$@"
 endif
 
 video.avi : autocrop.txt
-	@echo "VIDEO   $($(CFG_PREFIX)NAME)"
+	@echo 'VIDEO   $($(CFG_PREFIX)NAME)'
 	@$(MENCODER) $(SOURCE) -ovc x264 -oac copy $(if $(FIRST_AUDIO),-aid $(FIRST_AUDIO)) \
 		-x264encopts crf=$($(CFG_PREFIX)VIDEO_CRF):frameref=6:bframes=4:b_adapt:b_pyramid:direct_pred=auto:partitions=all:8x8dct:me=umh:subq=7:weight_b:trellis=2:threads=$($(CFG_PREFIX)VIDEO_THREADS) \
 		$(DEINTERLACE) -vf-add crop=$$(cat $^) -vf-add harddup \
 		-o "$@.tmp" 2>&1 \
-		| mclean -l $(STATUSBARLEN) -- "$($(CFG_PREFIX)NAME) (video)"
+		| mclean -l $(STATUSBARLEN) -- '$($(CFG_PREFIX)NAME) (video)'
 	@mv "$@.tmp" "$@"
 
 audio-$(FIRST_AUDIO).avi :
-	@echo "  AID $* link $($(CFG_PREFIX)NAME)"
+	@echo '  AID $* link $($(CFG_PREFIX)NAME)'
 	@ln -s video.avi "$@"
 
 # Always rip from an avi that has been ripped with both audio & video.  This prevents AV desync due to -ss skipping to
@@ -101,10 +101,10 @@ audio-$(FIRST_AUDIO).avi :
 # prevent make deleting the avi
 .PRECIOUS : audio-%.avi
 audio-%.avi :
-	@echo "  AID $* copy $($(CFG_PREFIX)NAME)"
+	@echo '  AID $* copy $($(CFG_PREFIX)NAME)'
 # The crop filter greatly reduces the amount of space the avi takes up (have to use raw, copy doesnt get vfs applied)
 	@$(MENCODER) $(SOURCE) -oac copy -ovc raw -vf crop=1:1 -aid $* -o "$@.tmp" 2>&1 \
-		| mclean -l $(STATUSBARLEN) -- "$($(CFG_PREFIX)NAME) (AID $* copy)"
+		| mclean -l $(STATUSBARLEN) -- '$($(CFG_PREFIX)NAME) (AID $* copy)'
 	@mv "$@.tmp" "$@"
 
 audio-%.lang :
@@ -113,11 +113,11 @@ audio-%.lang :
 	@mv "$@.tmp" "$@"
 
 audio-%.ogg : audio-%.avi
-	@echo "  AID $* (vorbis) $($(CFG_PREFIX)NAME)"
+	@echo '  AID $* (vorbis) $($(CFG_PREFIX)NAME)'
 	@rm -f "$@.fifo"
 	@mkfifo "$@.fifo"
 	@$(OGGENC) -q $($(CFG_PREFIX)AUDIO_$*_QUALITY) -o "$@.tmp" "$@.fifo" 2>&1 \
-		| mclean -- "$($(CFG_PREFIX)NAME) (AID $* vorbis)" &
+		| mclean -- '$($(CFG_PREFIX)NAME) (AID $* vorbis)' &
 	@$(MPLAYER) "audio-$*.avi" -hardframedrop -quiet -vo null -ao pcm:fast:file="$@.fifo" > "$@.log" 2>&1
 	@mv "$@.tmp" "$@"
 	@rm "$@.fifo"
@@ -129,16 +129,16 @@ audio-%.ogg : audio-%.avi
 #	@mv "$@.tmp" "$@"
 
 sub-%.idx :
-	@echo "   SID $* $($(CFG_PREFIX)NAME)"
+	@echo '   SID $* $($(CFG_PREFIX)NAME)'
 	@$(MENCODER) $(SOURCE) -ovc copy -oac copy -o /dev/null \
 		-vf harddup -vobsubout "sub-$*.tmp" -sid $* 2>&1 \
-		| mclean -l $(STATUSBARLEN) -- "$($(CFG_PREFIX)NAME) (SID $*)"
+		| mclean -l $(STATUSBARLEN) -- '$($(CFG_PREFIX)NAME) (SID $*)'
 	@mv "sub-$*.tmp.idx" "sub-$*.idx"
 	@mv "sub-$*.tmp.sub" "sub-$*.sub"
 	
 
 output.mkv : video.avi identify.txt $(if $(subst $",,$(CFG_PREFIX)GET_CHAPTERS),chapters.txt) $(SUBTITLE_TARGETS) $(AUDIO_TARGETS)
-	@echo "  MUX   $($(CFG_PREFIX)NAME)"
+	@echo '  MUX   $($(CFG_PREFIX)NAME)'
 # Ignore errors, as the subtitle ripping causes some warnings that will halt make otherwise
 	@-$(MKVMERGE) -o "$@.tmp" $(if $(shell test -s chapters.txt && echo y),--chapters chapters.txt) --title "$($(CFG_PREFIX)NAME)" --noaudio video.avi \
 		$(foreach aid,$($(CFG_PREFIX)AUDIOS),--language $(AUDIO_TARGET_$(aid)_TRACK):$$(cat "audio-$(aid).lang") --novideo "$(AUDIO_TARGET_$(aid))") \

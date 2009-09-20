@@ -11,7 +11,7 @@ all : mclean $(DIRS)
 
 .PHONY: $(DIRS)
 $(DIRS) :
-	$(MAKE) -C $@
+	@$(MAKE) -C '$@'
 
 # Rely on make's builtin rules to actually do the compilation
 mclean : mclean.c
